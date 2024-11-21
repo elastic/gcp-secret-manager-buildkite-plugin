@@ -35,6 +35,10 @@ The file path of a Google Cloud [credentials file][1] which is used to access th
 [application default credential][2] will be searched for and used if available.  The account credential must have the
 Secret Accessor role for the secret being accessed (`roles/secretmanager.secretAccessor`).
 
+### `google_project` (optional, string)
+
+The Google Cloud project ID to use for this invocation.
+
 ### `env` (object)
 
 An object defining the export variables names and the secret names which will populate the values.

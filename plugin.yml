@@ -8,6 +8,8 @@ configuration:
   properties:
     credentials_file:
       type: string
+    google_project:
+      type: string
     env:
       type: object
   additionalProperties: false

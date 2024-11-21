@@ -5,6 +5,7 @@ set -euo pipefail
 echo "--- :googlecloud::key: Reading secrets from GCP Secret Manager"
 
 initialized=""
+PROJECT_FLAG=""
 
 function initialize() {
   if [[ "${initialized}" -eq "1" ]]; then
@@ -33,6 +34,10 @@ function initialize() {
     gcloud auth activate-service-account --key-file "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE}"
   fi
 
+  if [ -v BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_GOOGLE_PROJECT ]; then
+    PROJECT_FLAG="--project=${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_GOOGLE_PROJECT}"
+  fi
+
   initialized="1"
 }
 
@@ -53,7 +58,7 @@ function get_secret_value() {
   local secret_version
   local secret_value
 
-  secret_version=$(gcloud secrets versions list "${secret_name}" --format=json | jq -r '.[0].name')
+  secret_version=$(gcloud secrets versions list "${secret_name}" --format=json "$PROJECT_FLAG" | jq -r '.[0].name')
   secret_version="${secret_version##*/}"
 
   local result=$?
@@ -63,7 +68,8 @@ function get_secret_value() {
 
   secret_value=$(gcloud secrets versions access "${secret_version}" \
     --secret="${secret_name}" \
-    --format='get(payload.data)' | tr '_-' '/+' | base64 -d)
+    --format='get(payload.data)' \
+    "$PROJECT_FLAG" | tr '_-' '/+' | base64 -d)
 
   result=$?
   if [[ $result -ne 0 ]]; then
